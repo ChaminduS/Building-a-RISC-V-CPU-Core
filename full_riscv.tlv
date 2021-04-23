@@ -116,7 +116,7 @@
    $br_tgt_pc[31:0] = $pc[31:0] + $imm ; 
    
    // Assert these to end simulation (before Makerchip cycle limit).
-   *passed = 1'b0;
+   m4+tb()
    *failed = *cyc_cnt > M4_MAX_CYC;
    
    m4+rf(32, 32, $reset, $rd_valid, $rd[4:0], $result[31:0], $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
