@@ -48,7 +48,7 @@
    $next_pc[31:0] = $reset ? 32'b0 : ($pc[31:0] + 32'b1);
    
    // Macro initiation for instruction retrieval
-   `READONLY_MEM($pc, $$instr[31:0]);
+   `READONLY_MEM($pc, $$instr[31:0])
    
    // Instruction classification
    $is_u_instr = $instr[6:2] ==? 5'b0x101;
@@ -73,6 +73,16 @@
    $rs2_valid = ($is_r_instr || $is_s_instr || $is_b_instr);
    
    `BOGUS_USE($rd $rd_valid $rs1 $rs1_valid $rs2 $rs2_valid $funct3 $funct7);
+   
+   // Extracting the immediate field from the instruction
+   $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
+                $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:8], $instr[7]} :
+                $is_b_instr ? {{19{$instr[31]}}, {2{$instr[7]}}, $instr[30:25],$instr[11:8], 1'b0} :
+                $is_u_instr ? {{2{$instr[31]}}, $instr[30:12], 11'b0} :
+                $is_j_instr ? {{11{$instr[31]}}, $instr[19:12], {2{$instr[20]}}, $instr[30:21], 1'b0} :
+                32'b0 ;
+   
+   
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
    *failed = *cyc_cnt > M4_MAX_CYC;
