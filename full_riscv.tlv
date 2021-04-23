@@ -96,6 +96,11 @@
    
    `BOGUS_USE($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add);
    
+   // Arithmetic Logic Unit Code
+   $result[31:0] = $is_addi ? $src1_value + $imm:
+                   $is_add ? $src1_value[31:0] + $src2_value[31:0]:
+                   32'b0;
+   
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
    *failed = *cyc_cnt > M4_MAX_CYC;
