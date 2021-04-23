@@ -67,7 +67,7 @@
    $opcode[6:0] = $instr[6:0];
    
    // Assigning boolean values for the validity of these fields
-   $rd_valid = ~($is_s_instr || $is_b_instr);
+   $rd_valid = ~($is_s_instr || $is_b_instr || $instr[11:7] == 5'b0);
    $imm_valid = ~$is_r_instr;
    $rs1_valid = ~($is_u_instr || $is_j_instr);
    $rs2_valid = ($is_r_instr || $is_s_instr || $is_b_instr);
@@ -105,7 +105,7 @@
    *passed = 1'b0;
    *failed = *cyc_cnt > M4_MAX_CYC;
    
-   m4+rf(32, 32, $reset, $wr_en, $wr_index[4:0], $wr_data[31:0], $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
+   m4+rf(32, 32, $reset, $wr_en, $wr_index[4:0], $result[31:0], $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
    //m4+dmem(32, 32, $reset, $addr[4:0], $wr_en, $wr_data[31:0], $rd_en, $rd_data)
    m4+cpu_viz()
 \SV
