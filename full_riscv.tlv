@@ -45,7 +45,9 @@
    
    // Code for the incrementation of the program counter
    $pc[31:0] = >>1$next_pc;
-   $next_pc[31:0] = $reset ? 32'b0 : ($pc[31:0] + 32'd4);
+   $next_pc[31:0] = $reset ? 32'b0 : 
+                    $taken_br ? $br_tgt_pc :
+                    ($pc[31:0] + 32'd4);
    
    // Macro initiation for instruction retrieval
    `READONLY_MEM($pc, $$instr[31:0])
@@ -110,11 +112,14 @@
                $is_bgeu ? ($src1_value >= $src2_value ? 1'b1 : 1'b0) :
                1'b0 ;
    
+   // Coding the next instruction location for branching
+   $br_tgt_pc[31:0] = $pc[31:0] + $imm ; 
+   
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
    *failed = *cyc_cnt > M4_MAX_CYC;
    
-   m4+rf(32, 32, $reset, $wr_en, $wr_index[4:0], $result[31:0], $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
+   m4+rf(32, 32, $reset, $rd_valid, $rd[4:0], $result[31:0], $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
    //m4+dmem(32, 32, $reset, $addr[4:0], $wr_en, $wr_data[31:0], $rd_en, $rd_data)
    m4+cpu_viz()
 \SV
