@@ -101,6 +101,15 @@
                    $is_add ? $src1_value[31:0] + $src2_value[31:0]:
                    32'b0;
    
+   // Coding the Branching Instruction MUX
+   $taken_br = $is_beq ? ($src1_value == $src2_value ? 1'b1 : 1'b0) :
+               $is_bne ? ($src1_value != $src2_value ? 1'b1 : 1'b0) :
+               $is_blt ? (($src1_value < $src2_value) ^ ($src1_value[31] != $src2_value[31]) ? 1'b1 : 1'b0) :
+               $is_bge ? (($src1_value >= $src2_value) ^ ($src1_value[31] != $src2_value[31]) ? 1'b1 : 1'b0) :
+               $is_bltu ? ($src1_value < $src2_value ? 1'b1 : 1'b0) :
+               $is_bgeu ? ($src1_value >= $src2_value ? 1'b1 : 1'b0) :
+               1'b0 ;
+   
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
    *failed = *cyc_cnt > M4_MAX_CYC;
