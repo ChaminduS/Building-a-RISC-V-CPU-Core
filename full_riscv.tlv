@@ -45,7 +45,7 @@
    
    // Code for the incrementation of the program counter
    $pc[31:0] = >>1$next_pc;
-   $next_pc[31:0] = $reset ? 32'b0 : ($pc[31:0] + 32'b1);
+   $next_pc[31:0] = $reset ? 32'b0 : ($pc[31:0] + 32'd4);
    
    // Macro initiation for instruction retrieval
    `READONLY_MEM($pc, $$instr[31:0])
