@@ -6,9 +6,8 @@ Accompanying resources for the [Building a RISC-V CPU Core](https://www.edx.org/
 
 ## Welcome
 
-Congratulations for taking this step to expand your knowledge of computer hardware.
-
-At this time, there are no course corrections or platform issues to report. Please do let us know within the EdX platform if anything gets in your way. There's a great deal of infrastructure to maintain for the course, and we aim to keep it all running smoothly. Now, back to EdX.
+The repository contains all the resources provided by the Linux Foundation.
+In addition, the complete code required to build the RISC-V CPU Core through the Makerchip IDE is also given here. Please note that the code you find [here](https://github.com/ChaminduS/Building-a-RISC-V-CPU-Core/blob/main/full_riscv.tlv) is work of ChaminduS and it is highly encouraged that you audit the course and generate the code on your own using the guidelines provided there.
 
 ## RISC-V Starting-Point Code
 
