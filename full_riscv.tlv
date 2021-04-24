@@ -7,34 +7,7 @@
 
 
 
-   //---------------------------------------------------------------------------------
-   // /====================\
-   // | Sum 1 to 9 Program |
-   // \====================/
-   //
-   // Program to test RV32I
-   // Add 1,2,3,...,9 (in that order).
-   //
-   // Regs:
-   //  x12 (a2): 10
-   //  x13 (a3): 1..10
-   //  x14 (a4): Sum
-   // 
-   m4_asm(ADDI, x14, x0, 0)             // Initialize sum register a4 with 0
-   m4_asm(ADDI, x12, x0, 1010)          // Store count of 10 in register a2.
-   m4_asm(ADDI, x13, x0, 1)             // Initialize loop count register a3 with 0
-   // Loop:
-   m4_asm(ADD, x14, x13, x14)           // Incremental summation
-   m4_asm(ADDI, x13, x13, 1)            // Increment loop count by 1
-   m4_asm(BLT, x13, x12, 1111111111000) // If a3 is less than a2, branch to label named <loop>
-   // Test result value in x14, and set x31 to reflect pass/fail.
-   m4_asm(ADDI, x30, x14, 111111010100) // Subtract expected value of 44 to set x30 to 1 if and only iff the result is 45 (1 + 2 + ... + 9).
-   m4_asm(BGE, x0, x0, 0) // Done. Jump to itself (infinite loop). (Up to 20-bit signed immediate plus implicit 0 bit (unlike JALR) provides byte address; last immediate bit should also be 0)
-   m4_asm_end()
-   m4_define(['M4_MAX_CYC'], 50)
-   //---------------------------------------------------------------------------------
-
-
+  m4_test_prog()
 
 \SV
    m4_makerchip_module   // (Expanded in Nav-TLV pane.)
@@ -50,7 +23,7 @@
                     ($pc[31:0] + 32'd4);
    
    // Macro initiation for instruction retrieval
-   `READONLY_MEM($pc, $$instr[31:0])
+   `READONLY_MEM($pc, $$instr[31:0]);
    
    // Instruction classification
    $is_u_instr = $instr[6:2] ==? 5'b0x101;
@@ -60,6 +33,9 @@
    $is_b_instr = $instr[6:2] == 5'b11000;
    $is_j_instr = $instr[6:2] == 5'b11011;
    
+   // Assigning load instructions using only the opcode
+   $is_load = ($opcode ==? 7'b0x00011); 
+      
    // Extracting fields from the instructions
    $rs2[4:0] = $instr[24:20];
    $funct7[6:0] = $instr[31:25];
@@ -95,6 +71,23 @@
    $is_bgeu = $dec_bits ==? 11'bx1111100011;
    $is_addi = $dec_bits ==? 11'bx0000010011;
    $is_add = $dec_bits ==? 11'b00000110011;
+   $is_slti = $dec_bits ==? 11'bx0100010011;
+   $is_sltiu = $dec_bits ==? 11'bx0110010011;
+   $is_xori = $dec_bits ==? 11'bx1000010011;
+   $is_ori = $dec_bits ==? 11'bx1100010011;
+   $is_andi = $dec_bits ==? 11'bx1110010011;
+   $is_slli = $dec_bits ==? 11'b00010010011;
+   $is_srli = $dec_bits ==? 11'b01010010011;
+   $is_srai = $dec_bits ==? 11'b11010010011;
+   $is_sub = $dec_bits ==? 11'b10000110011;
+   $is_sll = $dec_bits ==? 11'b00010110011;
+   $is_slt = $dec_bits ==? 11'b00100110011;
+   $is_sltu = $dec_bits ==? 11'b00110110011;
+   $is_xor = $dec_bits ==? 11'b01000110011;
+   $is_srl = $dec_bits ==? 11'b01010110011;
+   $is_sra = $dec_bits ==? 11'b11010110011;
+   $is_or = $dec_bits ==? 11'b01100110011;
+   $is_and = $dec_bits ==? 11'b01110110011;
    
    `BOGUS_USE($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add);
    
