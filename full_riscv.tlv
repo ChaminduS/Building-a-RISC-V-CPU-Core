@@ -1,6 +1,6 @@
 \m4_TLV_version 1d: tl-x.org
 \SV
-   // This code can be found in: https://github.com/stevehoover/LF-Building-a-RISC-V-CPU-Core/risc-v_shell.tlv
+   
    
    m4_include_lib(['https://raw.githubusercontent.com/stevehoover/warp-v_includes/1d1023ccf8e7b0a8cf8e8fc4f0a823ebb61008e3/risc-v_defs.tlv'])
    m4_include_lib(['https://raw.githubusercontent.com/stevehoover/LF-Building-a-RISC-V-CPU-Core/main/lib/risc-v_shell_lib.tlv'])
@@ -56,7 +56,7 @@
    $imm[31:0] = $is_i_instr ? {{21{$instr[31]}}, $instr[30:20]} :
                 $is_s_instr ? {{21{$instr[31]}}, $instr[30:25], $instr[11:8], $instr[7]} :
                 $is_b_instr ? {{19{$instr[31]}}, {2{$instr[7]}}, $instr[30:25],$instr[11:8], 1'b0} :
-                $is_u_instr ? {{2{$instr[31]}}, $instr[30:12], 11'b0} :
+                $is_u_instr ? {$instr[31], $instr[30:20], $instr[19:12], 12'b0} :
                 $is_j_instr ? {{11{$instr[31]}}, $instr[19:12], {2{$instr[20]}}, $instr[30:21], 1'b0} :
                 32'b0 ;
    
@@ -88,12 +88,52 @@
    $is_sra = $dec_bits ==? 11'b11010110011;
    $is_or = $dec_bits ==? 11'b01100110011;
    $is_and = $dec_bits ==? 11'b01110110011;
+   $is_lui = $dec_bits ==? 11'bxxxx0110111;
+   $is_auipc = $dec_bits ==? 11'bxxxx0010111;
+   $is_jal = $dec_bits ==? 11'bxxxx1101111;
+   $is_jalr = $dec_bits ==? 11'bx0001100111;
    
    `BOGUS_USE($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add);
    
    // Arithmetic Logic Unit Code
+   
+   // SLTU and SLTI (set if less than,unsigned) results:
+   $sltu_rslt[31:0] = {31'b0, $src1_value < $src2_value};
+   $sltiu_rslt[31:0] = {31'b0, $src1_value < $imm};
+   
+   // SRA and SRAI (shift right,arithmetic) results:
+   // sign-extended src1
+   $sext_src1[63:0] = {{32{$src1_value[31]}}, $src1_value};
+   // 64-bit sign-extended results. to be truncated
+   $sra_rslt[63:0] = $sext_src1 >> $src2_value[4:0];
+   $srai_rslt[63:0] = $sext_src1 >> $imm[4:0];
+   
+   
    $result[31:0] = $is_addi ? $src1_value + $imm:
                    $is_add ? $src1_value[31:0] + $src2_value[31:0]:
+                   $is_andi ? $src1_value & $imm:
+                   $is_ori ? $src1_value | $imm:
+                   $is_xori ? $src1_value ^ $imm:
+                   $is_addi ? $src1_value + $imm:
+                   $is_slli ? $src1_value << $imm[5:0]:
+                   $is_srli ? $src1_value >> $imm[5:0]:
+                   $is_and ? $src1_value & $src2_value:
+                   $is_or ? $src1_value | $src2_value:
+                   $is_xor ? $src1_value ^ $src2_value:
+                   $is_add ? $src1_value + $src2_value:
+                   $is_sub ? $src1_value - $src2_value:
+                   $is_sll ? $src1_value << $src2_value:
+                   $is_srl ? $src1_value >> $src2_value:
+                   $is_sltu ? $sltu_rslt:
+                   $is_sltiu ? $sltiu_rslt:
+                   $is_lui ? {$imm[31:12], 12'b0}:
+                   $is_auipc ? $pc + {$imm[31:12], 12'b0}:
+                   $is_jal ? $pc + 32'd4:
+                   $is_jalr ? $pc + 32'd4:
+                   $is_slt ? (($src1_value[31] == $src2_value[31]) ? $sltu_rslt : {31'b0, $src1_value[31]}):
+                   $is_slti ? (($src1_value[31] == $imm[31]) ? $sltu_rslt : {31'b0, $src1_value[31]}):
+                   $is_sra ? $sra_rslt[31:0]:
+                   $is_srai ? $srai_rslt[31:0]:
                    32'b0;
    
    // Coding the Branching Instruction MUX
