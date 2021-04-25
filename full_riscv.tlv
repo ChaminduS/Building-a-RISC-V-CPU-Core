@@ -136,6 +136,7 @@
                    $is_slti ? (($src1_value[31] == $imm[31]) ? $sltu_rslt : {31'b0, $src1_value[31]}):
                    $is_sra ? $sra_rslt[31:0]:
                    $is_srai ? $srai_rslt[31:0]:
+                   ($is_load || $is_s_instr) ? $src1_value + $imm:
                    32'b0;
    
    // Coding the Branching Instruction MUX
