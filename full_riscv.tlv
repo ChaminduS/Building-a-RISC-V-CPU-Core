@@ -138,6 +138,9 @@
                    $is_srai ? $srai_rslt[31:0]:
                    ($is_load || $is_s_instr) ? $src1_value + $imm:
                    32'b0;
+                   
+   // Adding a MUX to selsect either result or $ld_data depending on instruction 
+   $result_write_rf[31:0] = $is_load ? $ld_data[31:0] : $result;
    
    // Coding the Branching Instruction MUX
    $taken_br = $is_beq ? ($src1_value == $src2_value ? 1'b1 : 1'b0) :
@@ -156,8 +159,8 @@
    m4+tb()
    *failed = *cyc_cnt > M4_MAX_CYC;
    
-   m4+rf(32, 32, $reset, $rd_valid, $rd[4:0], $result[31:0], $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
-   m4+dmem(32, 32, $reset, $rd[4:0], $is_s_instr, $src2_value, $is_load, $ld_data)
+   m4+rf(32, 32, $reset, $rd_valid, $rd[4:0], $result_write_rf[31:0], $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
+   m4+dmem(32, 32, $reset, $result[6:2], $is_s_instr, $src2_value, $is_load, $ld_data)
    m4+cpu_viz()
 \SV
    endmodule
